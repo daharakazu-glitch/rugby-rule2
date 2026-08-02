@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ラグビー部員のための実践戦術・ルールマスター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap');
+        
+        /* 真のコバルトブルー基調のスタイル設定 */
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #001f5c 0%, #0047ab 50%, #001a4d 100%);
+            color: #ffffff;
+            font-size: 1.2rem; /* 大幅に大きめの文字サイズ */
+            min-height: 100vh;
+        }
+
+        .cobalt-card {
+            background-color: rgba(0, 32, 96, 0.85);
+            border: 2px solid #3b82f6;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .cobalt-header {
+            background-color: #001740;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        .pitch-bg {
+            background-color: #003380;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 80%),
+                linear-gradient(to right, rgba(255,255,255,0.2) 2px, transparent 2px),
+                linear-gradient(to bottom, rgba(255,255,255,0.2) 2px, transparent 2px);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
+            border: 3px solid #60a5fa;
+        }
+
+        .tab-btn {
+            font-size: 1.25rem;
+            font-weight: 800;
+            padding: 1rem 1.5rem;
+            border-bottom: 4px solid transparent;
+            color: #93c5fd;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: #fbbf24;
+            color: #fbbf24;
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #001740;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2563eb;
+            border-radius: 6px;
+            border: 2px solid #001740;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- ヘッダー -->
+    <header class="cobalt-header sticky top-0 z-50 shadow-2xl">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-4">
+                <div class="bg-amber-400 text-blue-950 p-3 rounded-2xl font-black text-3xl flex items-center justify-center w-14 h-14 shadow-lg">
+                    <i class="fa-solid fa-football"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-amber-300 tracking-wider">RUGBY TACTICS & RULES</h1>
+                    <p class="text-base text-blue-200 font-bold mt-0.5">初心者部員向け 実践戦術＆ルール学習マスター</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ナビゲーションタブ（文字サイズ超大型化） -->
+        <nav class="max-w-7xl mx-auto px-6 flex space-x-4 border-t border-blue-800/80 overflow-x-auto">
+            <button onclick="switchTab('dictionary')" id="tab-dictionary" class="tab-btn active whitespace-nowrap flex items-center gap-3">
+                <i class="fa-solid fa-book text-xl"></i> 用語・ルール図鑑
+            </button>
+            <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn whitespace-nowrap flex items-center gap-3">
+                <i class="fa-solid fa-chalkboard-user text-xl"></i> 視覚戦術ボード
+            </button>
+            <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn whitespace-nowrap flex items-center gap-3">
+                <i class="fa-solid fa-circle-question text-xl"></i> 実戦判断クイズ
+            </button>
+        </nav>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-6 md:p-8">
+
+        <!-- 1. 用語・ルール図鑑 -->
+        <section id="sec-dictionary" class="block space-y-8">
+            <!-- 検索 & カテゴリフィルター & 全表示切替 -->
+            <div class="cobalt-card p-6 rounded-2xl flex flex-col lg:flex-row gap-6 justify-between items-center">
+                <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto flex-grow max-w-2xl">
+                    <div class="relative w-full">
+                        <i class="fa-solid fa-magnifying-glass absolute left-5 top-5 text-blue-300 text-xl"></i>
+                        <input type="text" id="searchInput" oninput="filterTerms()" placeholder="キーワード検索（例: ラック, ジャッカル...）"
+                            class="w-full bg-blue-950/90 border-2 border-blue-400 text-white pl-14 pr-5 py-3.5 rounded-xl text-lg focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400 font-bold placeholder-blue-300/70">
+                    </div>
+                    <!-- 全体表示/非表示切替ボタン -->
+                    <button onclick="toggleAllDefinitions()" id="btnToggleAll" class="shrink-0 bg-amber-400 hover:bg-amber-300 text-blue-950 font-black px-5 py-3.5 rounded-xl text-base transition flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-eye-slash text-lg"></i> <span>すべての解説を隠す</span>
+                    </button>
+                </div>
+                
+                <div class="flex flex-wrap gap-3 w-full lg:w-auto" id="categoryFilters">
+                    <!-- ボタン動的生成 -->
+                </div>
+            </div>
+
+            <!-- カードグリッド -->
+            <div id="termsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 用語カード動的描画 -->
+            </div>
+        </section>
+
+        <!-- 2. 視覚戦術ボード -->
+        <section id="sec-simulator" class="hidden space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 操作パネル -->
+                <div class="cobalt-card p-6 rounded-2xl space-y-6">
+                    <h2 class="text-2xl font-black text-amber-300 flex items-center gap-3">
+                        <i class="fa-solid fa-sliders"></i> 戦術・概念を選択
+                    </h2>
+                    <p class="text-base text-blue-100 font-medium leading-relaxed">
+                        戦術の動きや空間の概念をアニメーションで確認できます。
+                    </p>
+                    
+                    <div class="space-y-3" id="simMenu">
+                        <button onclick="loadSim('channels')" class="sim-btn w-full text-left p-4 rounded-xl bg-blue-900/90 hover:bg-blue-800 border-2 border-blue-400 transition flex justify-between items-center text-lg font-bold text-white">
+                            <span><i class="fa-solid fa-bars-staggered mr-3 text-amber-400"></i>チャンネル [1] [2] [3]</span>
+                            <i class="fa-solid fa-chevron-right text-base"></i>
+                        </button>
+                        <button onclick="loadSim('shape')" class="sim-btn w-full text-left p-4 rounded-xl bg-blue-900/90 hover:bg-blue-800 border-2 border-blue-400 transition flex justify-between items-center text-lg font-bold text-white">
+                            <span><i class="fa-solid fa-users-rays mr-3 text-amber-400"></i>シェイプ & 表裏ライン</span>
+                            <i class="fa-solid fa-chevron-right text-base"></i>
+                        </button>
+                        <button onclick="loadSim('defense')" class="sim-btn w-full text-left p-4 rounded-xl bg-blue-900/90 hover:bg-blue-800 border-2 border-blue-400 transition flex justify-between items-center text-lg font-bold text-white">
+                            <span><i class="fa-solid fa-shield-cat mr-3 text-amber-400"></i>ラッシュ vs スライド vs アンブレラ</span>
+                            <i class="fa-solid fa-chevron-right text-base"></i>
+                        </button>
+                        <button onclick="loadSim('breakdown')" class="sim-btn w-full text-left p-4 rounded-xl bg-blue-900/90 hover:bg-blue-800 border-2 border-blue-400 transition flex justify-between items-center text-lg font-bold text-white">
+                            <span><i class="fa-solid fa-hand-grab mr-3 text-amber-400"></i>ブレイクダウン＆ピラー/ポスト</span>
+                            <i class="fa-solid fa-chevron-right text-base"></i>
+                        </button>
+                    </div>
+
+                    <!-- 解説ボックス -->
+                    <div id="simInfoBox" class="bg-blue-950/90 p-5 rounded-xl border-2 border-blue-400 text-base space-y-3 leading-relaxed">
+                        <!-- 情報更新エリア -->
+                    </div>
+                </div>
+
+                <!-- キャンバス表示 -->
+                <div class="lg:col-span-2 cobalt-card p-6 rounded-2xl flex flex-col items-center justify-center min-h-[480px] relative overflow-hidden">
+                    <canvas id="tacticsCanvas" class="w-full h-full max-h-[520px] rounded-xl pitch-bg shadow-2xl"></canvas>
+                    <div class="absolute bottom-10 right-10 flex gap-3">
+                        <button onclick="restartSimAnimation()" class="bg-amber-400 hover:bg-amber-300 text-blue-950 font-black px-6 py-3 rounded-xl text-base transition flex items-center gap-2 shadow-xl">
+                            <i class="fa-solid fa-rotate-right"></i> アニメーション再開
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 実戦判断クイズ -->
+        <section id="sec-quiz" class="hidden space-y-8">
+            <div class="max-w-4xl mx-auto cobalt-card p-8 md:p-10 rounded-2xl space-y-8">
+                <div class="flex justify-between items-center border-b-2 border-blue-700/80 pb-6">
+                    <div>
+                        <span class="text-base font-black uppercase tracking-widest text-amber-300">Practical Situation Test</span>
+                        <h2 class="text-2xl md:text-3xl font-black text-white">ラグビー実戦判断＆ルールクイズ</h2>
+                    </div>
+                    <span id="quizProgress" class="text-lg font-black bg-blue-950 px-5 py-2.5 rounded-full border-2 border-blue-400 text-amber-300">
+                        Q 1 / 5
+                    </span>
+                </div>
+
+                <!-- クイズ設問コンテンツ -->
+                <div id="quizContainer" class="space-y-6">
+                    <!-- 動的挿入 -->
+                </div>
+
+                <!-- 解説結果ボックス -->
+                <div id="quizResultBox" class="hidden bg-blue-950/95 p-6 rounded-2xl border-2 border-blue-400 space-y-4">
+                    <div id="quizFeedback" class="font-black text-2xl"></div>
+                    <p id="quizExplanation" class="text-lg text-blue-100 leading-relaxed font-medium"></p>
+                    <button onclick="nextQuestion()" class="mt-4 bg-amber-400 hover:bg-amber-300 text-blue-950 px-8 py-3.5 rounded-xl font-black text-lg transition shadow-xl flex items-center gap-3">
+                        次の問題へ <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- フッター -->
+    <footer class="cobalt-header text-center py-6 text-base font-bold text-blue-200 mt-auto">
+        <p>ラグビー専門用語（渡辺さん作成資料）準拠 実践学習ツール</p>
+    </footer>
+
+    <!-- JavaScript ロジック -->
+    <script>
+        // 用語データ（渡辺さん作成資料より、idを割り振り）
+        const rugbyTerms = [
+            // 戦術編
+            { id: 1, name: "チャンネル", category: "戦術", badge: "重要", desc: "アタックエリアの区切り。[1]ブレークダウン〜1stレシーバー(SO役)間、[2]SO〜アウトサイドCTB間、[3]アウトサイドCTB〜WTB(オープン)までのエリア。" },
+            { id: 2, name: "テリトリー & ポゼッション", category: "戦術", badge: "基本", desc: "テリトリー：地域獲得率（どれだけ相手陣地でプレイできているか）。ポゼッション：ボール保持率のこと。" },
+            { id: 3, name: "ストラクチャー / アンストラクチャー", category: "戦術", badge: "重要", desc: "ストラクチャー：スクラム、ラインアウト、キックオフなどの起点（セットプレー）。アンストラクチャー：そこから崩れた混沌（カオス）状態。" },
+            { id: 4, name: "リロード", category: "戦術", badge: "初心者必須", desc: "1つのプレーや仕事を終えた後、素早く立ち上がりすぐに次のプレー・仕事の位置に入ること。" },
+            { id: 5, name: "エッジ", category: "戦術", badge: "用語", desc: "グラウンドのタッチラインに近い両端のエリアのこと。" },
+            { id: 6, name: "ディーコイ (ディーコイランナー)", category: "戦術", badge: "戦術", desc: "囮（おとり）となって走り、相手ディフェンスを引きつける選手のこと。" },
+            { id: 7, name: "ペネトレーター", category: "戦術", badge: "役目", desc: "ディフェンスラインを強力に縦へ突破する役目の選手。" },
+            { id: 8, name: "シェイプ (9シェイプ/10シェイプ/12シェイプ)", category: "戦術", badge: "重要", desc: "順目連続攻撃のユニットの形。パス出し役（9番,10番,12番）から連動して動くFW等のグループ。" },
+            { id: 9, name: "ポッド", category: "戦術", badge: "高度戦術", desc: "いくつかの攻撃チャンネルにユニットを作り、人がボールを追いかけるのではなく攻撃チャンネルにボールを動かして防御を崩す戦術。" },
+            { id: 10, name: "オーバーラップ", category: "戦術", badge: "攻撃", desc: "相手防衛ラインよりも攻撃側の人数が多く「余っている」有利な状態。" },
+            { id: 11, name: "ダブルライン (フロントドア / バックドア)", category: "戦術", badge: "戦術", desc: "攻撃ラインが前後に2つある状態。前のラインをフロントドア、後ろのラインをバックドアと呼ぶ。" },
+
+            // パス・キック編
+            { id: 12, name: "オフロードパス", category: "パス・キック", badge: "スキル", desc: "タックルを受けながら（倒れながら）サポートの味方にボールをつなぐパス。" },
+            { id: 13, name: "カットパス", category: "パス・キック", badge: "スキル", desc: "すぐ隣の選手を飛ばして、その外側の選手へ渡す飛ばしパス。" },
+            { id: 14, name: "ボックスキック", category: "パス・キック", badge: "キック", desc: "SHなどが高く蹴り上げ、タッチライン近くのエリアに落とすキック。" },
+            { id: 15, name: "クロスキック", category: "パス・キック", badge: "キック", desc: "逆サイドのオープンエリアへ大きくサイドチェンジするキック。" },
+            { id: 16, name: "コンテストキック (ハイパント等)", category: "パス・キック", badge: "キック", desc: "高く蹴り上げ、自チームと相手チームで空中戦（再獲得）を競い合えるキック。" },
+            { id: 17, name: "テリトリーキック", category: "パス・キック", badge: "キック", desc: "陣地を獲得するために距離を出して遠くへ蹴るキック。" },
+            { id: 18, name: "チェイス / チェイサー", category: "パス・キック", badge: "運動量", desc: "キックしたボールを追うこと、およびその追いかける選手。" },
+
+            // ブレイクダウン編
+            { id: 19, name: "ブレイクダウン", category: "ブレイクダウン", badge: "超重要", desc: "プレーヤー同士の接触後に起こるボール争奪局面（ラックやモールなど）。" },
+            { id: 20, name: "アスレチックポジション (ストロングポジション)", category: "ブレイクダウン", badge: "姿勢", desc: "低い姿勢で顔を上げ、足を前後にして相手の圧力に耐える強い姿勢。" },
+            { id: 21, name: "クリーンアウト", category: "ブレイクダウン", badge: "スキル", desc: "ブレイクダウンでボールの上を越えて相手をつかみ、はがしながら前に押し出すこと。" },
+            { id: 22, name: "ウィンドウ", category: "ブレイクダウン", badge: "用語", desc: "ジャッカルしようとする相手選手の胸元のエリア（ここに入り込んで剥がす）。" },
+            { id: 23, name: "ゴールデンメーター", category: "ブレイクダウン", badge: "キーポイント", desc: "ブレイクダウンの真上1m四方のスペース。ここを制圧できるかで優劣が決まる。" },
+            { id: 24, name: "カウンターラック", category: "ブレイクダウン", badge: "ターンオーバー", desc: "ディフェンス側がブレイクダウンに強いプレッシャーをかけて押し込み、ボールを奪い返すプレー。" },
+
+            // ディフェンス編
+            { id: 25, name: "ピラー / ポスト", category: "ディフェンス", badge: "立ち位置", desc: "ピラー：ブレイクダウンの両脇最至近で守る人。ポスト：ピラーのすぐ隣（2番目）に立つディフェンダー。" },
+            { id: 26, name: "ジャッカル", category: "ディフェンス", badge: "花形プレー", desc: "タックルで倒れた相手のボールを、自分の足で立ったまま手で奪いに行くプレー。" },
+            { id: 27, name: "ノミネート", category: "ディフェンス", badge: "声出し必須", desc: "自分がマークする相手を声を出して周囲に明確に示すこと。「俺ここ！」" },
+            { id: 28, name: "ラッシュアップディフェンス (詰め)", category: "ディフェンス", badge: "システム", desc: "ディフェンスラインが素早く前へ詰めて相手に思考時間を与えずプレッシャーをかける。" },
+            { id: 29, name: "スライド / ドリフトディフェンス (流し)", category: "ディフェンス", badge: "システム", desc: "パス展開に合わせて内側から外側へ並行にずれながら守るシステム。" },
+            { id: 30, name: "アンブレラディフェンス", category: "ディフェンス", badge: "システム", desc: "外側の選手が前に飛び出し、内側が少し下がって傘状になり外側へのパスコースを遮断する。" },
+            { id: 31, name: "ジョッキー", category: "ディフェンス", badge: "遅延防御", desc: "相手に数的優位を作られた際、地域を譲りつつ後ろに下がりながら時間を稼ぎ数的不利を解消する。" },
+            { id: 32, name: "バッキングアップ", category: "ディフェンス", badge: "カバー", desc: "ディフェンスラインを突破された際、後ろを斜めに走り抜けてカバーするプレー。" },
+
+            // ルール & 反則編
+            { id: 33, name: "ノットロールアウェー", category: "反則・ルール", badge: "ペナルティ", desc: "タックルした選手が倒れた後、速やかにタックルされた選手から離れない反則。" },
+            { id: 34, name: "ノット 10メートル", category: "反則・ルール", badge: "ペナルティ", desc: "反則後10m下がる前に妨害したり、キックオフが10mラインを超えなかった場合の反則。" },
+            { id: 35, name: "コラプシング", category: "反則・ルール", badge: "ペナルティ", desc: "スクラムやモール、ラックを故意に崩す危険な反則。" },
+            { id: 36, name: "ダイレクトタッチ", category: "反則・ルール", badge: "ルール", desc: "22mライン外から蹴ったボールがバウンドせずに直接タッチを出ること（蹴った地点まで戻される）。" },
+            { id: 37, name: "オブストラクション", category: "反則・ルール", badge: "ペナルティ", desc: "ボールを持っていない相手選手を妨害したり、ボールキャリアの前を味方が走る反則。" },
+            { id: 38, name: "ホールディング", category: "反則・ルール", badge: "ペナルティ", desc: "タックル成立後、タックラーが相手からすぐ離れずに掴み続けたままにする反則。" },
+            { id: 39, name: "フライングウェッジ", category: "反則・ルール", badge: "危険プレー", desc: "味方同士がバインド（結合）してブロックを作り相手に突進する危険な反則ペナルティ。" },
+            { id: 40, name: "マーク (フェアキャッチ)", category: "反則・ルール", badge: "ルール", desc: "自陣22mラインより後方で相手のキックを直接キャッチし「マーク！」と叫んでフリーキックを得る。" }
+        ];
+
+        // クイズデータ
+        const quizData = [
+            {
+                question: "【ディフェンス】相手チームが展開攻撃で人数が余り（オーバーラップ）、数的優位を作られました。このとき急いで前に詰めず、後ろに下がりながら外へ流して時間を稼ぎ、味方の戻りを待つ防衛スタイルを何と呼ぶ？",
+                options: ["ラッシュディフェンス", "ジョッキー", "ジャッカル", "ピラー"],
+                answer: 1,
+                explanation: "正解は「ジョッキー」です！数的優位（オーバーラップ）を作られた際、むやみに詰めるのではなく後ろに下がりながら流し、数的不利を解消する重要な遅延防御スタイルです。"
+            },
+            {
+                question: "【ブレイクダウン】タックルで倒れた相手に対し、立ったまま手でボールを奪いに行く高難易度かつ強力なプレーは？",
+                options: ["クリーンアウト", "ジャッカル", "コラプシング", "オフロード"],
+                answer: 1,
+                explanation: "正解は「ジャッカル」です！自分の足でしっかり自立した状態でボールへアタックすることがルール上の必須条件です（倒れ込むとペナルティ）。"
+            },
+            {
+                question: "【反則ルール】自分が相手にタックルして倒した後、すぐに対処しなければならないルール（反則）は何？",
+                options: ["タックラーはすぐ相手から離れないと『ノットロールアウェー』になる", "そのままボールを離さず抱え込む", "相手のジャージを掴み続ける", "相手の上に倒れ込んだままにする"],
+                answer: 0,
+                explanation: "正解は「ノットロールアウェー」です！タックルした選手（タックラー）は、倒れた後に速やかにその場所からロール（転がって離れる）しなければペナルティを取られます。"
+            },
+            {
+                question: "【戦術】ブレイクダウンの真横（至近距離）に立ち、相手のラックサイドの突進を防衛する一番目のディフェンダーの位置を何と呼ぶ？",
+                options: ["ポスト", "ピラー", "エッジ", "チェイサー"],
+                answer: 1,
+                explanation: "正解は「ピラー」です！ブレイクダウンの両脇最至近を守るのが「ピラー」、そのすぐ隣（2番目）に立つのが「ポスト」です。"
+            },
+            {
+                question: "【用語】仕事（タックルやクリーンアウトなど）を終えた後、立ち上がってすぐ次の攻撃・防御の立ち位置に入り直す超重要な動作は？",
+                options: ["リロード", "ペネトレート", "ディーコイ", "バッキングアップ"],
+                answer: 0,
+                explanation: "正解は「リロード」です！ラグビーにおいて『リロードの速さ』はチームの勝敗を分ける最も重要な運動量と意識の指標です。"
+            }
+        ];
+
+        // 各用語の表示/非表示状態を管理（初期状態はすべて表示 = true）
+        const termVisibilityMap = {};
+        rugbyTerms.forEach(t => { termVisibilityMap[t.id] = true; });
+
+        let allVisible = true; // 一括切替用の状態フラグ
+        let currentCategory = "すべて";
+        let currentQuizIndex = 0;
+        let simAnimFrame = null;
+        let simType = 'channels';
+        let animProgress = 0;
+
+        window.onload = function() {
+            renderCategoryFilterButtons();
+            filterTerms();
+            loadQuiz();
+            initCanvas();
+            loadSim('channels');
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            ['dictionary', 'simulator', 'quiz'].forEach(id => {
+                document.getElementById(`sec-${id}`).classList.add('hidden');
+            });
+            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+
+            if(tabId === 'simulator') {
+                setTimeout(() => {
+                    resizeCanvas();
+                    restartSimAnimation();
+                }, 100);
+            }
+        }
+
+        function renderCategoryFilterButtons() {
+            const categories = ["すべて", "戦術", "パス・キック", "ブレイクダウン", "ディフェンス", "反則・ルール"];
+            const container = document.getElementById('categoryFilters');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="setCategory('${cat}')" class="cat-btn border-2 text-base px-5 py-2.5 rounded-full font-black transition ${cat === currentCategory ? 'bg-amber-400 text-blue-950 border-amber-400 shadow-lg' : 'bg-blue-950 border-blue-400 text-blue-100 hover:bg-blue-900'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function setCategory(cat) {
+            currentCategory = cat;
+            renderCategoryFilterButtons();
+            filterTerms();
+        }
+
+        // 個別用語の解説表示/非表示トグル
+        function toggleSingleTermDesc(termId) {
+            termVisibilityMap[termId] = !termVisibilityMap[termId];
+            filterTerms();
+        }
+
+        // すべての解説表示/非表示トグル
+        function toggleAllDefinitions() {
+            allVisible = !allVisible;
+            rugbyTerms.forEach(t => {
+                termVisibilityMap[t.id] = allVisible;
+            });
+
+            const btn = document.getElementById('btnToggleAll');
+            if(allVisible) {
+                btn.innerHTML = `<i class="fa-solid fa-eye-slash text-lg"></i> <span>すべての解説を隠す</span>`;
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-eye text-lg"></i> <span>すべての解説を表示</span>`;
+            }
+            filterTerms();
+        }
+
+        function filterTerms() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const grid = document.getElementById('termsGrid');
+
+            const filtered = rugbyTerms.filter(t => {
+                const matchesCat = (currentCategory === "すべて" || t.category === currentCategory);
+                const matchesKw = t.name.toLowerCase().includes(keyword) || t.desc.toLowerCase().includes(keyword);
+                return matchesCat && matchesKw;
+            });
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-20 text-blue-200 text-2xl font-bold">該当する用語が見つかりません</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(t => {
+                const isVisible = termVisibilityMap[t.id];
+                return `
+                <div class="cobalt-card p-6 rounded-2xl flex flex-col justify-between space-y-4 hover:border-amber-400 transition">
+                    <div>
+                        <div class="flex justify-between items-start gap-3 mb-3">
+                            <h3 class="font-black text-2xl text-amber-300 leading-snug">${t.name}</h3>
+                            <span class="text-sm font-black px-3 py-1 rounded-lg bg-blue-950 text-blue-200 border border-blue-400 shrink-0">${t.badge}</span>
+                        </div>
+
+                        <!-- 解説本文（トグル表示） -->
+                        <div class="mt-2 min-h-[80px] flex items-center">
+                            ${isVisible ? `
+                                <p class="text-lg text-white leading-relaxed font-medium bg-blue-950/40 p-4 rounded-xl border border-blue-500/30 w-full">${t.desc}</p>
+                            ` : `
+                                <button onclick="toggleSingleTermDesc(${t.id})" class="w-full text-center py-4 px-4 bg-blue-950/80 hover:bg-blue-900 border-2 border-dashed border-amber-400/80 text-amber-300 font-bold text-base rounded-xl transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-eye"></i> クリックして解説を表示 (暗記モード)
+                                </button>
+                            `}
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-blue-800/80 flex justify-between items-center text-sm font-bold text-blue-200">
+                        <span>カテゴリ: <strong class="text-amber-300">${t.category}</strong></span>
+                        <button onclick="toggleSingleTermDesc(${t.id})" class="text-amber-400 hover:text-amber-300 underline font-bold flex items-center gap-1">
+                            <i class="fa-solid ${isVisible ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                            ${isVisible ? '解説を隠す' : '解説を表示'}
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // キャンバスアニメーション
+        let canvas, ctx;
+
+        function initCanvas() {
+            canvas = document.getElementById('tacticsCanvas');
+            ctx = canvas.getContext('2d');
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        }
+
+        function resizeCanvas() {
+            if(!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width - 48;
+            canvas.height = 460;
+        }
+
+        function loadSim(type) {
+            simType = type;
+            const infoBox = document.getElementById('simInfoBox');
+            if(type === 'channels') {
+                infoBox.innerHTML = `
+                    <h4 class="font-black text-amber-300 text-xl">【チャンネル 1・2・3】の概念</h4>
+                    <p class="text-base text-blue-100">グラウンドの横幅を攻撃起点（ラック）から区分します：</p>
+                    <ul class="text-base text-blue-100 list-disc list-inside space-y-2">
+                        <li><strong class="text-emerald-400">チャンネル 1:</strong> ラックからSO（1stレシーバー）付近</li>
+                        <li><strong class="text-cyan-300">チャンネル 2:</strong> SOから外側CTBまでの展開エリア</li>
+                        <li><strong class="text-purple-300">チャンネル 3:</strong> 大外のWTB（エッジ）スペース</li>
+                    </ul>
+                `;
+            } else if(type === 'shape') {
+                infoBox.innerHTML = `
+                    <h4 class="font-black text-amber-300 text-xl">【シェイプ & 表裏ライン】</h4>
+                    <p class="text-base text-blue-100">攻撃の2重ライン（ダブルライン）構造：</p>
+                    <ul class="text-base text-blue-100 list-disc list-inside space-y-2">
+                        <li><strong class="text-amber-300">フロントドア:</strong> 前面ライン（FW突進/囮）</li>
+                        <li><strong class="text-cyan-300">バックドア:</strong> 前面の裏を通る展開ライン（SO/BK）</li>
+                    </ul>
+                `;
+            } else if(type === 'defense') {
+                infoBox.innerHTML = `
+                    <h4 class="font-black text-amber-300 text-xl">【ディフェンスシステムの違い】</h4>
+                    <ul class="text-base text-blue-100 list-disc list-inside space-y-2">
+                        <li><strong class="text-red-400">ラッシュアップ:</strong> 一斉に前へ詰めて圧迫</li>
+                        <li><strong class="text-cyan-300">スライド:</strong> 外へ流れながら人数不利をカバー</li>
+                        <li><strong class="text-amber-300">アンブレラ:</strong> 大外の選手が前に出てパスコース遮断</li>
+                    </ul>
+                `;
+            } else if(type === 'breakdown') {
+                infoBox.innerHTML = `
+                    <h4 class="font-black text-amber-300 text-xl">【ブレイクダウン & ピラー / ポスト】</h4>
+                    <p class="text-base text-blue-100">ラック周辺1m「ゴールデンメーター」の攻防：</p>
+                    <ul class="text-base text-blue-100 list-disc list-inside space-y-2">
+                        <li><strong class="text-yellow-300">ピラー:</strong> ラック横0mを守る最重要防衛線</li>
+                        <li><strong class="text-amber-300">ポスト:</strong> ピラーの隣（2番目）の守備位置</li>
+                    </ul>
+                `;
+            }
+
+            restartSimAnimation();
+        }
+
+        function restartSimAnimation() {
+            if(simAnimFrame) cancelAnimationFrame(simAnimFrame);
+            animProgress = 0;
+            animateTactics();
+        }
+
+        function animateTactics() {
+            animProgress += 0.008;
+            if(animProgress > 1) animProgress = 0;
+
+            drawTacticsPitch();
+            simAnimFrame = requestAnimationFrame(animateTactics);
+        }
+
+        function drawTacticsPitch() {
+            if(!ctx) return;
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // コート枠
+            ctx.strokeStyle = "rgba(255,255,255,0.6)";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(20, 20, w - 40, h - 40);
+
+            // ライン
+            ctx.beginPath();
+            ctx.setLineDash([6, 6]);
+            ctx.moveTo(w * 0.3, 20); ctx.lineTo(w * 0.3, h - 20);
+            ctx.moveTo(w * 0.7, 20); ctx.lineTo(w * 0.7, h - 20);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            if(simType === 'channels') {
+                drawChannels(w, h);
+            } else if(simType === 'shape') {
+                drawShapeSim(w, h);
+            } else if(simType === 'defense') {
+                drawDefenseSim(w, h);
+            } else if(simType === 'breakdown') {
+                drawBreakdownSim(w, h);
+            }
+        }
+
+        function drawChannels(w, h) {
+            const startX = 80;
+            const c1Width = 110;
+            const c2Width = 170;
+
+            // CH1
+            ctx.fillStyle = "rgba(16, 185, 129, 0.4)";
+            ctx.fillRect(startX, 20, c1Width, h - 40);
+            ctx.fillStyle = "#6ee7b7"; ctx.font = "bold 16px Noto Sans JP";
+            ctx.fillText("CH 1 (ラック近隣)", startX + 10, 50);
+
+            // CH2
+            ctx.fillStyle = "rgba(6, 182, 212, 0.4)";
+            ctx.fillRect(startX + c1Width, 20, c2Width, h - 40);
+            ctx.fillStyle = "#67e8f9";
+            ctx.fillText("CH 2 (SO 〜 CTB)", startX + c1Width + 20, 50);
+
+            // CH3
+            ctx.fillStyle = "rgba(168, 85, 247, 0.4)";
+            ctx.fillRect(startX + c1Width + c2Width, 20, w - 40 - (startX + c1Width + c2Width), h - 40);
+            ctx.fillStyle = "#e9d5ff";
+            ctx.fillText("CH 3 (外側CTB 〜 エッジ)", startX + c1Width + c2Width + 20, 50);
+
+            drawPlayer(startX, h/2, "#fbbf24", "ラック");
+            const passX = startX + (c1Width + c2Width + 120) * animProgress;
+            ctx.beginPath();
+            ctx.arc(passX, h/2, 10, 0, Math.PI*2);
+            ctx.fillStyle = "#ffffff"; ctx.fill();
+        }
+
+        function drawShapeSim(w, h) {
+            const rx = 100, ry = h/2;
+            drawPlayer(rx, ry, "#ef4444", "9(SH)");
+
+            const pass1 = Math.min(animProgress * 2, 1);
+            const soX = rx + 90, soY = ry + 30;
+            if(pass1 < 1) drawBall(rx + (soX - rx)*pass1, ry + (soY - ry)*pass1);
+            
+            drawPlayer(soX, soY, "#fbbf24", "10(SO)");
+
+            const f1X = soX + 100, f1Y = soY - 50;
+            const f2X = soX + 100, f2Y = soY;
+            drawPlayer(f1X, f1Y, "#f59e0b", "FW1");
+            drawPlayer(f2X, f2Y, "#f59e0b", "FW2 (表)");
+
+            const bdX = soX + 180, bdY = soY + 50;
+            drawPlayer(bdX, bdY, "#60a5fa", "12 (裏)");
+
+            ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 3; ctx.setLineDash([5,5]);
+            ctx.beginPath(); ctx.moveTo(soX, soY); ctx.lineTo(f2X, f2Y); ctx.stroke();
+            ctx.strokeStyle = "#60a5fa";
+            ctx.beginPath(); ctx.moveTo(soX, soY); ctx.lineTo(bdX, bdY); ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawDefenseSim(w, h) {
+            const t = animProgress;
+            ctx.fillStyle = "#ffffff"; ctx.font = "bold 16px Noto Sans JP";
+            ctx.fillText("ディフェンスラインの動き (赤=DF, 青=AT)", 30, 50);
+
+            [100, 190, 280, 370].forEach((y, i) => {
+                drawPlayer(w - 100, y, "#60a5fa", `AT${i+1}`);
+            });
+
+            const rushMove = t * 70;
+            drawPlayer(100 + rushMove, 100, "#ef4444", "ラッシュ");
+            
+            const slideX = 100 + t * 50;
+            const slideY = 190 + t * 35;
+            drawPlayer(slideX, slideY, "#3b82f6", "スライド");
+
+            const umbX = 100 + (t > 0.3 ? (t-0.3)*140 : 0);
+            drawPlayer(umbX, 370, "#fbbf24", "アンブレラ");
+        }
+
+        function drawBreakdownSim(w, h) {
+            const cx = w/2, cy = h/2;
+
+            ctx.fillStyle = "rgba(251, 191, 36, 0.3)";
+            ctx.fillRect(cx - 50, cy - 50, 100, 100);
+            ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 3;
+            ctx.strokeRect(cx - 50, cy - 50, 100, 100);
+            ctx.fillStyle = "#fef08a"; ctx.font = "bold 14px Noto Sans JP";
+            ctx.fillText("ゴールデンメーター (1m)", cx - 45, cy - 55);
+
+            ctx.fillStyle = "#3b82f6";
+            ctx.fillRect(cx - 30, cy - 8, 60, 16);
+            drawBall(cx, cy);
+
+            const pMove = Math.sin(animProgress * Math.PI * 2) * 6;
+            drawPlayer(cx - 75, cy - 35 + pMove, "#ef4444", "ピラー");
+            drawPlayer(cx - 120, cy - 50 + pMove, "#ef4444", "ポスト");
+            drawPlayer(cx + 75, cy - 35, "#ef4444", "ピラー");
+        }
+
+        function drawPlayer(x, y, color, label) {
+            ctx.beginPath();
+            ctx.arc(x, y, 16, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3; ctx.stroke();
+
+            if(label) {
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 14px Noto Sans JP";
+                ctx.textAlign = "center";
+                ctx.fillText(label, x, y + 32);
+            }
+        }
+
+        function drawBall(x, y) {
+            ctx.beginPath();
+            ctx.ellipse(x, y, 11, 6, Math.PI/4, 0, Math.PI * 2);
+            ctx.fillStyle = "#fbbf24";
+            ctx.fill();
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // クイズロジック
+        function loadQuiz() {
+            const q = quizData[currentQuizIndex];
+            document.getElementById('quizProgress').innerText = `Q ${currentQuizIndex + 1} / ${quizData.length}`;
+            
+            const container = document.getElementById('quizContainer');
+            document.getElementById('quizResultBox').classList.add('hidden');
+
+            container.innerHTML = `
+                <div class="bg-blue-950 p-6 rounded-2xl border-2 border-blue-400">
+                    <p class="font-black text-white text-xl md:text-2xl leading-relaxed">${q.question}</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
+                    ${q.options.map((opt, idx) => `
+                        <button onclick="checkAnswer(${idx})" class="quiz-opt-btn bg-blue-900/90 hover:bg-blue-800 text-left p-5 rounded-2xl border-2 border-blue-400 text-lg md:text-xl transition font-black text-white flex items-center shadow-lg">
+                            <span class="inline-block w-10 h-10 rounded-full bg-amber-400 text-blue-950 text-center text-lg leading-10 mr-4 font-black shrink-0 shadow-md">${idx + 1}</span>
+                            ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function checkAnswer(selectedIdx) {
+            const q = quizData[currentQuizIndex];
+            const isCorrect = (selectedIdx === q.answer);
+
+            document.querySelectorAll('.quiz-opt-btn').forEach((btn, idx) => {
+                btn.disabled = true;
+                if(idx === q.answer) {
+                    btn.classList.add('bg-emerald-600', 'border-emerald-300', 'text-white');
+                } else if(idx === selectedIdx && !isCorrect) {
+                    btn.classList.add('bg-red-600', 'border-red-300', 'text-white');
+                }
+            });
+
+            const resultBox = document.getElementById('quizResultBox');
+            const feedback = document.getElementById('quizFeedback');
+            const exp = document.getElementById('quizExplanation');
+
+            resultBox.classList.remove('hidden');
+            if(isCorrect) {
+                feedback.className = "font-black text-2xl text-emerald-300 flex items-center gap-3";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> 正解！素晴らしい理解力です！`;
+            } else {
+                feedback.className = "font-black text-2xl text-red-300 flex items-center gap-3";
+                feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 残念... もう一度確認しよう`;
+            }
+
+            exp.innerText = q.explanation;
+        }
+
+        function nextQuestion() {
+            currentQuizIndex = (currentQuizIndex + 1) % quizData.length;
+            loadQuiz();
+        }
+    </script>
+</body>
+</html>
